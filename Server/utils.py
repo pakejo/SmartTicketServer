@@ -7,14 +7,16 @@ def get_db_handle():
                          username="client-user",
                          password="paquejoivan"
                          )
-    db_handle = client["SmarTicket"]
+    db_handle = client["smarticket"]
     return db_handle, client
 
 
 def get_collection_handle(db_handle, collection_name):
-    print(db_handle[collection_name])
     return db_handle[collection_name]
 
 
 db, client = get_db_handle()
-get_collection_handle(db, "sample_airbnb")
+collection_handle = get_collection_handle(db, "events")
+
+for document in collection_handle.find():
+    print(document)
