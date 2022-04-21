@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-
+from helpers import get_sample_events, get_sample_sales
 
 def get_db_handle():
     client = MongoClient(host="mongodb+srv://smarticket.zau1q.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -16,7 +16,10 @@ def get_collection_handle(db_handle, collection_name):
 
 
 db, client = get_db_handle()
-collection_handle = get_collection_handle(db, "events")
 
-for document in collection_handle.find():
-    print(document)
+collectionEvents = db["events"]
+#get_sample_events(collectionEvents)
+
+get_sample_sales(db["sales"], db["events"])
+
+
