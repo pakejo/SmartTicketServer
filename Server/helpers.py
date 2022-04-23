@@ -31,7 +31,7 @@ def get_sample_events(collection):
     categories = ("Music", "Science", "Health", "Sport")
     statuses = ("Popular", "Recent", "Finished", "Soon")
 
-    for i in range(25):
+    for i in range(1):
         dict = {
             "name": "Event " + str(i),
             "description": "Magna occaecat in qui est ipsum aute laboris consequat. Pariatur sit aute nisi incididunt velit cupidatat laborum deserunt voluptate. Dolore minim nulla sunt nostrud dolor adipisicing voluptate. Sint cillum mollit velit in culpa commodo quis ex deserunt nisi aute velit magna eu. Quis voluptate irure aute aliqua nostrud. Labore et cupidatat tempor enim cillum irure dolore eu quis.",
@@ -43,9 +43,9 @@ def get_sample_events(collection):
             "date": random_date("1/1/2022 1:30 PM", "1/1/2024 4:50 AM", random.random())
         }
 
-        x = collection.insert_one(dict)
+        # x = collection.insert_one(dict)
 
-        print(x.inserted_id)
+        print(dict)
 
 
 def get_sample_sales(sales, events):
@@ -60,3 +60,6 @@ def get_sample_sales(sales, events):
         }
 
         sales.insert_one(data)
+
+
+get_sample_events("")
