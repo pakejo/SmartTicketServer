@@ -9,6 +9,7 @@ from .models import *
 
 class EventsViewsets(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
+    serializer_class = EventSerializer
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
