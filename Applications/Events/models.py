@@ -26,5 +26,5 @@ class Event(models.Model):
     status = models.CharField(max_length=20)
     date = models.DateTimeField()
     location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)
-
+    imageUrl = models.URLField(max_length=50, blank=True)
 

@@ -2,7 +2,10 @@ import random
 import string
 import time
 from random_address import real_random_address
-
+import requests
+import json
+from Server.helpers import get_sample_events
+from Server.utils import get_db_handle
 
 def str_time_prop(start, end, time_format, prop):
     """Get a time at a proportion of a range of two formatted times.
@@ -26,12 +29,12 @@ def random_date(start, end, prop):
 
 
 def get_sample_events(collection):
-    data = []
+    images = get_images()
 
     categories = ("Music", "Science", "Health", "Sport")
     statuses = ("Popular", "Recent", "Finished", "Soon")
 
-    for i in range(1):
+    for i in range(25):
         dict = {
             "name": "Event " + str(i),
             "description": "Magna occaecat in qui est ipsum aute laboris consequat. Pariatur sit aute nisi incididunt velit cupidatat laborum deserunt voluptate. Dolore minim nulla sunt nostrud dolor adipisicing voluptate. Sint cillum mollit velit in culpa commodo quis ex deserunt nisi aute velit magna eu. Quis voluptate irure aute aliqua nostrud. Labore et cupidatat tempor enim cillum irure dolore eu quis.",
@@ -40,10 +43,11 @@ def get_sample_events(collection):
             "price": random.randint(10, 100),
             "category": random.choice(categories),
             "status": random.choice(statuses),
-            "date": random_date("1/1/2022 1:30 PM", "1/1/2024 4:50 AM", random.random())
+            "date": random_date("1/1/2022 1:30 PM", "1/1/2024 4:50 AM", random.random()),
+            "imageUrl": random.choice(images)
         }
 
-        # x = collection.insert_one(dict)
+        x = collection.insert_one(dict)
 
         print(dict)
 
@@ -61,5 +65,18 @@ def get_sample_sales(sales, events):
 
         sales.insert_one(data)
 
+def get_images():
+    headers = {'Authorization': '563492ad6f91700001000001dee153914da746a8bc7de5379d78a79d'}
 
-get_sample_events("")
+    x = requests.get("http://api.pexels.com/v1/search?query=party&per_page=25", headers=headers)
+
+    data = json.loads(x.text)
+
+    urls = []
+
+    for d in data['photos']:
+        urls.append(d['src']['original'])
+
+    print(urls)
+
+    return(urls)
