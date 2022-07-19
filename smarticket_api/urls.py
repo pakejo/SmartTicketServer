@@ -1,4 +1,3 @@
-from django.db import router
 from rest_framework import routers
 
 from smarticket_api.views import *

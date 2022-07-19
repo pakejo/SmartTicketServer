@@ -1,7 +1,9 @@
 from django.db import models
 
+
 class Category(models.Model):
     category = models.CharField(primary_key=True, auto_created=False, max_length=20, blank=False)
+
 
 class Coordinates(models.Model):
     lat = models.DecimalField(max_digits=12, decimal_places=8)
@@ -28,6 +30,7 @@ class Event(models.Model):
     date = models.DateTimeField()
     location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)
     imageUrl = models.URLField(max_length=50, blank=True)
+
 
 class Sale(models.Model):
     _id = models.CharField(primary_key=True, auto_created=True, max_length=50, blank=True)
