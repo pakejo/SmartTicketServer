@@ -33,7 +33,7 @@ SECRET_KEY = env('SECRET_KEY')
 # False if not in os.environ because of casting above
 DEBUG = env('IS_DEBUG_MODE_ENABLED')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://smartticketsserver.herokuapp.com/', 'localhost', '127.0.0.1']
 
 # Application definition
 DJANGO_APPS = (
