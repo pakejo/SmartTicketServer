@@ -32,7 +32,6 @@ class Event(models.Model):
 
 
 class Sale(models.Model):
-    _id = models.CharField(primary_key=True, auto_created=True, max_length=50, blank=True)
-    eventId = models.CharField(max_length=32)
-    customerId = models.CharField(max_length=32)
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    event = models.ForeignKey(Event, related_name='event', on_delete=models.CASCADE)
+    customerId = models.CharField(max_length=32, null=False)
+    price = models.DecimalField(max_digits=7, decimal_places=5)

@@ -59,8 +59,6 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
-    _id = serializers.CharField(required=False)
-
     class Meta:
         model = Sale
         fields = '__all__'
