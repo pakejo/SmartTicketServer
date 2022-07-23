@@ -1,8 +1,7 @@
-from pickletools import read_floatnl
 from rest_framework import serializers
-
 #
 from .models import *
+
 
 class CoordinatesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,13 +16,47 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = '__all__'
 
+    def create(self, validated_data):
+        coordinates_data = validated_data.pop('coordinates')
+        new_coordinates, _ = Coordinates.objects.get_or_create(coordinates_data)
+        location, _ = Location.objects.get_or_create(coordinates=new_coordinates, **validated_data)
+        return location
+
+    def update(self, instance, validated_data):
+        data = LocationSerializer(validated_data).data
+        # Update location (nested serializer)
+        coordinates_serializer = self.fields['coordinates']
+        coordinates_instance = instance.coordinates
+        coordinates_data = data.pop('coordinates')
+        coordinates_serializer.update(coordinates_instance, coordinates_data)
+        # Update location
+        return super(LocationSerializer, self).update(instance, data)
+
+
 class EventSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
-    _id = serializers.CharField(required=False)
 
     class Meta:
         model = Event
         fields = '__all__'
+
+    def create(self, validated_data):
+        location_data = validated_data.pop('location')
+        location_serializer = LocationSerializer(data=location_data)
+        _ = location_serializer.is_valid()
+        location = location_serializer.create(location_serializer.validated_data)
+        event, _ = Event.objects.get_or_create(location=location, **validated_data)
+        return event
+
+    def update(self, instance, validated_data):
+        # Update location (nested serializer)
+        location_serializer = self.fields['location']
+        location_instance = instance.location
+        location_data = validated_data.pop('location')
+        location_serializer.update(location_instance, location_instance)
+        # Update event
+        return super(EventSerializer, self).update(instance, validated_data)
+
 
 class SaleSerializer(serializers.ModelSerializer):
     _id = serializers.CharField(required=False)

@@ -20,7 +20,6 @@ class Location(models.Model):
 
 
 class Event(models.Model):
-    _id = models.CharField(primary_key=True, auto_created=True, max_length=50, blank=True)
     name = models.CharField(max_length=20)
     description = models.TextField()
     promoter = models.CharField(max_length=20)
