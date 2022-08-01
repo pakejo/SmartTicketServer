@@ -28,10 +28,28 @@ class Event(models.Model):
     status = models.CharField(max_length=20)
     date = models.DateTimeField()
     location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)
-    imageUrl = models.URLField(max_length=50, blank=True)
+    imageUrl = models.URLField(max_length=100, blank=True)
 
 
 class Sale(models.Model):
     event = models.ForeignKey(Event, related_name='event', on_delete=models.CASCADE)
     customerId = models.CharField(max_length=32, null=False)
     price = models.DecimalField(max_digits=7, decimal_places=5)
+
+
+class User(models.Model):
+    USER_ROLES = [
+        ('USER', 'user'),
+        ('STAFF', 'staff'),
+        ('PROMOTER', 'promoter'),
+        ('ADMIN', 'admin')
+    ]
+    uid = models.CharField(max_length=40, default='', primary_key=True, auto_created=False)
+    username = models.CharField(max_length=20)
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=30)
+    email = models.EmailField()
+    profile_picture = models.CharField(max_length=100, blank=True)
+    user_role = models.CharField(max_length=10, choices=USER_ROLES, default='USER')
+    wallet_hash = models.CharField(max_length=50, blank=True)
+
