@@ -2,7 +2,7 @@ import datetime
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
 from smarticket_api.serializers import *
@@ -47,5 +47,11 @@ class SalesViewSets(viewsets.ModelViewSet):
 class UsersViewSets(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     serializer_class = UserSerializer
+    parser_classes = (MultiPartParser, FormParser)
     queryset = User.objects.all()
 
+
+class CategoryViewSets(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'put', 'delete']
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()

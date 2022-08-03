@@ -1,7 +1,8 @@
-from django.contrib.auth.models import User
 from rest_framework import authentication
 from rest_framework import exceptions
 from firebase_admin import auth, initialize_app, firestore
+
+from smarticket_api.models import User
 
 initialize_app()
 
@@ -24,14 +25,11 @@ class FirebaseBackend(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('Invalid ID Token')
 
         try:
-            uid = decoded_token.get("uid")
+            user_uid = decoded_token.get("uid")
         except Exception:
             raise exceptions.AuthenticationFailed('No such user exists')
 
         # Get user data from document
-        document_db = firestore.client()
-        user_document = document_db.collection(u'users').document(uid).get()
-
-        user, _ = User.objects.get_or_create(user_document.to_dict())
+        user, _ = User.objects.get(pk=user_uid)
 
         return user, None

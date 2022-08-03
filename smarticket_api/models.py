@@ -1,6 +1,11 @@
 from django.db import models
 
 
+# lets us explicitly set upload path and filename
+def upload_to(instance, filename):
+    return 'images/{filename}'.format(filename=filename)
+
+
 class Category(models.Model):
     category = models.CharField(primary_key=True, auto_created=False, max_length=20, blank=False)
 
@@ -48,8 +53,7 @@ class User(models.Model):
     username = models.CharField(max_length=20)
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=30)
-    email = models.EmailField()
-    profile_picture = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
+    profile_picture = models.ImageField(upload_to=upload_to, blank=True, null=True)
     user_role = models.CharField(max_length=10, choices=USER_ROLES, default='USER')
     wallet_hash = models.CharField(max_length=50, blank=True)
-

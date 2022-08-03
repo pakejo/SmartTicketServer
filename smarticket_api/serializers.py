@@ -53,7 +53,7 @@ class EventSerializer(serializers.ModelSerializer):
         location_serializer = self.fields['location']
         location_instance = instance.location
         location_data = validated_data.pop('location')
-        location_serializer.update(location_instance, location_instance)
+        location_serializer.update(location_instance, location_data)
         # Update event
         return super(EventSerializer, self).update(instance, validated_data)
 
@@ -65,6 +65,14 @@ class SaleSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField(required=False)
+
     class Meta:
         model = User
+        fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
         fields = '__all__'
