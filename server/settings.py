@@ -35,8 +35,7 @@ DEBUG = env('IS_DEBUG_MODE_ENABLED')
 
 ALLOWED_HOSTS = ['*']
 
-# Application definition
-DJANGO_APPS = (
+INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,20 +43,11 @@ DJANGO_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'smarticket_api',
-    'rest_framework'
-)
-
-# Add here all news apps
-LOCAL_APPS = (
-
-)
-
-# Add here all third-party libraries
-THIRD_PARTY_APPS = (
+    'rest_framework',
     'corsheaders',
+    # IMPORTANT: this package should always be the last one
+    'django_cleanup.apps.CleanupConfig',
 )
-
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

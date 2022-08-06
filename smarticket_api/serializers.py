@@ -18,7 +18,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         coordinates_data = validated_data.pop('coordinates')
-        new_coordinates, _ = Coordinates.objects.get_or_create(coordinates_data)
+        new_coordinates, _ = Coordinates.objects.get_or_create(lat=coordinates_data['lat'], lng=coordinates_data['lng'])
         location, _ = Location.objects.get_or_create(coordinates=new_coordinates, **validated_data)
         return location
 
@@ -34,6 +34,7 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    imageUrl = serializers.ImageField(required=False)
     location = LocationSerializer()
 
     class Meta:
