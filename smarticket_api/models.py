@@ -2,7 +2,7 @@ from django.db import models
 
 
 # lets us explicitly set upload path and filename
-def upload_to(instance, filename):
+def upload_to(_instance, filename):
     return 'images/{filename}'.format(filename=filename)
 
 
@@ -24,7 +24,7 @@ class User(models.Model):
 
 
 class Category(models.Model):
-    category = models.CharField(primary_key=True, auto_created=False, max_length=20, blank=False)
+    name = models.CharField(primary_key=True, auto_created=False, max_length=20, blank=False)
 
 
 class Coordinates(models.Model):
@@ -33,8 +33,8 @@ class Coordinates(models.Model):
 
 
 class Location(models.Model):
-    address1 = models.CharField(max_length=20)
-    address2 = models.CharField(max_length=20, blank=True)
+    address1 = models.CharField(max_length=40)
+    address2 = models.CharField(max_length=40, blank=True)
     city = models.CharField(max_length=20)
     state = models.CharField(max_length=20)
     postalCode = models.IntegerField()
@@ -46,7 +46,7 @@ class Event(models.Model):
     description = models.TextField()
     promoter = models.ForeignKey(User, related_name='promoter', on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=5, decimal_places=2)
-    category = models.CharField(max_length=20)
+    category = models.ForeignKey(Category, related_name='category', on_delete=models.CASCADE)
     status = models.CharField(max_length=20)
     date = models.DateTimeField()
     location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)

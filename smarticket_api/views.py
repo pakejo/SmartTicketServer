@@ -1,11 +1,13 @@
 import datetime
 
-from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
+from smarticket_api.filters import EventsFilter
 from smarticket_api.serializers import *
 
 
@@ -13,16 +15,12 @@ class EventsViewSets(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     serializer_class = EventSerializer
     parser_classes = (MultiPartParser, FormParser)
+    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
+    filterset_class = EventsFilter
+    search_fields = ['=promoter__uid']
+    ordering_fields = ['name']
+    ordering = ['name']
     queryset = Event.objects.all()
-
-    def get_queryset(self):
-        if len(self.request.query_params) >= 1:
-            q_objects = Q()
-            for param, value in self.request.query_params.items():
-                q_objects &= Q(**{param: value})
-            return self.queryset.filter(q_objects)
-        else:
-            return self.queryset
 
     @action(detail=False)
     def future_events(self, request):

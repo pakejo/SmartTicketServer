@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'smarticket_api',
     'rest_framework',
     'corsheaders',
+    'django_filters',
     # IMPORTANT: this package should always be the last one
     'django_cleanup.apps.CleanupConfig',
 )
@@ -116,11 +117,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'smarticket_api.firebase_auth.FirebaseBackend',
-#     ]
-# }
+REST_FRAMEWORK = {
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'smarticket_api.firebase_auth.FirebaseBackend',
+    # ]
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
