@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.response import Response
 
 from smarticket_api.filters import EventsFilter
@@ -47,7 +47,7 @@ class SalesViewSets(viewsets.ModelViewSet):
 class UsersViewSets(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     serializer_class = UserSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
     queryset = User.objects.all()
 
     @action(detail=True)
