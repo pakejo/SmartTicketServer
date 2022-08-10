@@ -140,4 +140,4 @@ GitHub.sublime-settings
 django-firebase-credentials.json
 
 # Images
-uploads/*
+uploads/
