@@ -48,8 +48,6 @@ INSTALLED_APPS = (
     'corsheaders',
     'django_filters',
     'cloudinary',
-    # IMPORTANT: this package should always be the last one
-    'django_cleanup.apps.CleanupConfig',
 )
 
 MIDDLEWARE = [
