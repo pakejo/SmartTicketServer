@@ -7,6 +7,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.response import Response
 
+from smart_contract.SmartTicketContract import SmartTicketContract
 from smarticket_api.filters import EventsFilter
 from smarticket_api.serializers import *
 
@@ -34,14 +35,31 @@ class SalesViewSets(viewsets.ModelViewSet):
     serializer_class = SaleSerializer
     queryset = Sale.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        if len(request.query_params) >= 1:
-            queryset = self.queryset.filter(**request.query_params.dict())
-        else:
-            queryset = self.queryset
+    def create(self, request, *args, **kwargs):
+        customer_id = request.POST.get('customerId')
+        customer_wallet_key = request.POST.get('wallet_key')
+        event_id = request.POST.get('event')
+        price = float(request.POST.get('price'))
 
-        serializer = SaleSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        event = Event.objects.get(pk=event_id)
+        promoter = event.promoter
+        customer = User.objects.get(pk=customer_id)
+
+        contract = SmartTicketContract(promoter, customer, event_id, price)
+        purchase_hash = contract.confirm_purchase()
+        received_hash = contract.confirm_received()
+        sale_hash = contract.refund_seller()
+
+        sale = Sale.objects.create(
+            event=event,
+            customerId=customer_id,
+            price=price,
+            txHash=sale_hash
+        )
+
+        sale.save()
+        serializer = SaleSerializer(sale)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UsersViewSets(viewsets.ModelViewSet):

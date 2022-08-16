@@ -21,6 +21,7 @@ class User(models.Model):
     profile_picture = models.ImageField(upload_to=upload_to, blank=True, null=True)
     user_role = models.CharField(max_length=10, choices=USER_ROLES, default='USER')
     wallet_hash = models.CharField(max_length=50, blank=True)
+    wallet_private_key = models.CharField(max_length=70, null=True, blank=True)
 
 
 class Category(models.Model):
@@ -57,3 +58,4 @@ class Sale(models.Model):
     event = models.ForeignKey(Event, related_name='event', on_delete=models.CASCADE)
     customerId = models.CharField(max_length=32, null=False)
     price = models.DecimalField(max_digits=7, decimal_places=5)
+    txHash = models.CharField(max_length=70, blank=True, null=True)

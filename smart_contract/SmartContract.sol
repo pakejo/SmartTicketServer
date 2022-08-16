@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.7;
 
 contract Purchase {
     // Event price
@@ -55,7 +55,9 @@ contract Purchase {
     event SellerRefunded();
 
     // Promoter address comes with the message
-    constructor(uint _price, string memory _promoter_uid, string memory _event_id, string memory _customer_id) payable {
+    constructor(uint _price, string memory _promoter_uid, string memory _event_id, string memory _customer_id)
+    payable
+    {
         price = _price;
         seller = payable(msg.sender);
         promoter_uid = _promoter_uid;
