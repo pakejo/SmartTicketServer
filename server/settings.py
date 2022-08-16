@@ -147,9 +147,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_TMP = os.path.join(BASE_DIR, 'static')
 STATIC_URL = 'static/'
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticHashedCloudinaryStorage'
 
-# os.makedirs(STATIC_TMP, exist_ok=True)
-# os.makedirs(STATIC_ROOT, exist_ok=True)
+os.makedirs(STATIC_TMP, exist_ok=True)
+os.makedirs(STATIC_ROOT, exist_ok=True)
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
