@@ -58,4 +58,6 @@ class Sale(models.Model):
     event = models.ForeignKey(Event, related_name='event', on_delete=models.CASCADE)
     customerId = models.CharField(max_length=32, null=False)
     price = models.DecimalField(max_digits=7, decimal_places=5)
-    txHash = models.CharField(max_length=70, blank=True, null=True)
+    purchaseHash = models.CharField(max_length=70, blank=True, null=True)
+    receivedHash = models.CharField(max_length=70, blank=True, null=True)
+    refundHash = models.CharField(max_length=70, blank=True, null=True)

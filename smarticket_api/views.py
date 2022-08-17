@@ -44,19 +44,21 @@ class SalesViewSets(viewsets.ModelViewSet):
         event = Event.objects.get(pk=event_id)
         promoter = event.promoter
         customer = User.objects.get(pk=customer_id)
+        customer.wallet_private_key = customer_wallet_key
 
         contract = SmartTicketContract(promoter, customer, event_id, price)
         purchase_hash = contract.confirm_purchase()
         received_hash = contract.confirm_received()
-        sale_hash = contract.refund_seller()
+        refund_hash = contract.refund_seller()
 
         sale = Sale.objects.create(
             event=event,
             customerId=customer_id,
             price=price,
-            txHash=sale_hash
+            purchaseHash=purchase_hash,
+            received_hash=received_hash,
+            refundHash=refund_hash
         )
-
         sale.save()
         serializer = SaleSerializer(sale)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
