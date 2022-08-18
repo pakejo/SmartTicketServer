@@ -23,11 +23,11 @@ class SmartTicketContract:
         self.__api_key = __env('INFURA_API_KEY')
         self.__w3 = Web3(Web3.HTTPProvider(__env('INFURA_GURLI_ENDPOINT')))
 
-        self.__promoter_id = promoter.id
+        self.__promoter_id = promoter.uid
         self.__promoter_address = promoter.wallet_hash
         self.__promoter_key = promoter.wallet_private_key
 
-        self.__customer_id = customer.id
+        self.__customer_id = customer.uid
         self.__customer_address = customer.wallet_hash
         self.__customer_key = customer.wallet_private_key
 
@@ -78,9 +78,9 @@ class SmartTicketContract:
         contract_id, contract_interface = self.__compile_source_file().popitem()
         contract = self.__w3.eth.contract(abi=contract_interface['abi'], bytecode=contract_interface["bin"])
         construct_tx = contract.constructor(
-            self.__price,
+            self.__w3.toWei(self.__price, 'ether'),
             self.__promoter_id,
-            self.__event_id,
+            str(self.__event_id),
             self.__customer_id
         ).build_transaction({
             'nonce': self.__w3.eth.get_transaction_count(self.__promoter_address),
@@ -95,6 +95,14 @@ class SmartTicketContract:
             address=self.__contract_address,
             abi=contract_interface['abi']
         )
+
+    def get_contract_address(self):
+        """
+        Gets the contract address
+
+        :return: Contract address
+        """
+        return self.__contract_address
 
     def confirm_purchase(self):
         """

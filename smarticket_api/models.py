@@ -23,10 +23,15 @@ class User(models.Model):
     wallet_hash = models.CharField(max_length=50, blank=True)
     wallet_private_key = models.CharField(max_length=70, null=True, blank=True)
 
+    def __str__(self):
+        return self.username
+
 
 class Category(models.Model):
     name = models.CharField(primary_key=True, auto_created=False, max_length=20, blank=False)
 
+    def __str__(self):
+        return self.name
 
 class Coordinates(models.Model):
     lat = models.DecimalField(max_digits=12, decimal_places=8)
@@ -53,11 +58,19 @@ class Event(models.Model):
     location = models.ForeignKey(Location, related_name='location', on_delete=models.CASCADE)
     imageUrl = models.ImageField(upload_to=upload_to, blank=True, null=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Sale(models.Model):
     event = models.ForeignKey(Event, related_name='event', on_delete=models.CASCADE)
     customerId = models.CharField(max_length=32, null=False)
+    date = models.DateTimeField(null=True)
     price = models.DecimalField(max_digits=7, decimal_places=5)
+    contractAddress = models.CharField(max_length=70, blank=True, null=True)
     purchaseHash = models.CharField(max_length=70, blank=True, null=True)
     receivedHash = models.CharField(max_length=70, blank=True, null=True)
     refundHash = models.CharField(max_length=70, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.id} - {self.contractAddress}"

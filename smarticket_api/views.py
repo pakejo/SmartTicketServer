@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
@@ -25,7 +25,7 @@ class EventsViewSets(viewsets.ModelViewSet):
 
     @action(detail=False)
     def future_events(self, request):
-        future_events = self.queryset.filter(date__gt=datetime.datetime.now())
+        future_events = self.queryset.filter(date__gt=datetime.now())
         serializer = EventSerializer(future_events, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -36,15 +36,13 @@ class SalesViewSets(viewsets.ModelViewSet):
     queryset = Sale.objects.all()
 
     def create(self, request, *args, **kwargs):
-        customer_id = request.POST.get('customerId')
-        customer_wallet_key = request.POST.get('wallet_key')
-        event_id = request.POST.get('event')
-        price = float(request.POST.get('price'))
+        customer_id = request.data.get('customerID')
+        event_id = request.data.get('event')
+        price = float(request.data.get('price'))
 
         event = Event.objects.get(pk=event_id)
         promoter = event.promoter
         customer = User.objects.get(pk=customer_id)
-        customer.wallet_private_key = customer_wallet_key
 
         contract = SmartTicketContract(promoter, customer, event_id, price)
         purchase_hash = contract.confirm_purchase()
@@ -54,9 +52,11 @@ class SalesViewSets(viewsets.ModelViewSet):
         sale = Sale.objects.create(
             event=event,
             customerId=customer_id,
+            date=datetime.now(),
             price=price,
+            contractAddress=contract.get_contract_address(),
             purchaseHash=purchase_hash,
-            received_hash=received_hash,
+            receivedHash=received_hash,
             refundHash=refund_hash
         )
         sale.save()
