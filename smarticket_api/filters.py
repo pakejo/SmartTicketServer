@@ -10,6 +10,7 @@ class EventsFilter(filters.FilterSet):
             'id': ['gte'],
             'name': ['exact', 'icontains'],
             'category__name': ['exact', 'icontains'],
-            'date': ['exact', 'gte', 'lte']
+            'date': ['exact', 'gte', 'lte'],
+            'promoter__uid': ['exact']
         }
         exclude = ['imageUrl']

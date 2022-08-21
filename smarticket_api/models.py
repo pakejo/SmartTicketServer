@@ -30,12 +30,19 @@ class User(models.Model):
 class Category(models.Model):
     name = models.CharField(primary_key=True, auto_created=False, max_length=20, blank=False)
 
+    class Meta:
+        verbose_name_plural = 'Categories'
+
     def __str__(self):
         return self.name
+
 
 class Coordinates(models.Model):
     lat = models.DecimalField(max_digits=12, decimal_places=8)
     lng = models.DecimalField(max_digits=12, decimal_places=8)
+
+    class Meta:
+        verbose_name_plural = 'Coordinates'
 
 
 class Location(models.Model):
@@ -66,11 +73,18 @@ class Sale(models.Model):
     event = models.ForeignKey(Event, related_name='event', on_delete=models.CASCADE)
     customerId = models.CharField(max_length=32, null=False)
     date = models.DateTimeField(null=True)
-    price = models.DecimalField(max_digits=7, decimal_places=5)
-    contractAddress = models.CharField(max_length=70, blank=True, null=True)
     purchaseHash = models.CharField(max_length=70, blank=True, null=True)
-    receivedHash = models.CharField(max_length=70, blank=True, null=True)
     refundHash = models.CharField(max_length=70, blank=True, null=True)
+    token = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.id} - {self.contractAddress}"
+        return f"{self.event.name} - {self.customerId}"
+
+
+class Contract(models.Model):
+    event = models.OneToOneField(Event, on_delete=models.CASCADE)
+    address = models.CharField(max_length=70, blank=True, null=True)
+    abi = models.JSONField()
+
+    def __str__(self):
+        return f"{self.event} - {self.address}"

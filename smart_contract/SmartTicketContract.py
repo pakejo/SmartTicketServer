@@ -4,7 +4,6 @@ from pathlib import Path
 
 import solcx
 from environ import environ
-from solcx import compile_source
 from web3 import Web3
 
 from server.settings import BASE_DIR
@@ -13,27 +12,28 @@ from server.settings import BASE_DIR
 class SmartTicketContract:
     max_gas_price = 3000000
 
-    def __init__(self, promoter, customer, event_id, price):
+    def __init__(self, promoter, customer, price):
         __env = environ.Env()
         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
         # Install the solidity compiler
-        solcx.install_solc(version='0.8.7')
+        solcx.install_solc(version='0.8.16')
 
         self.__api_key = __env('INFURA_API_KEY')
         self.__w3 = Web3(Web3.HTTPProvider(__env('INFURA_GURLI_ENDPOINT')))
 
-        self.__promoter_id = promoter.uid
-        self.__promoter_address = promoter.wallet_hash
-        self.__promoter_key = promoter.wallet_private_key
+        self.__price = self.__w3.toWei(int(price), 'ether')
+        self.__contract_instance = None
 
-        self.__customer_id = customer.uid
-        self.__customer_address = customer.wallet_hash
-        self.__customer_key = customer.wallet_private_key
+        if promoter is not None:
+            self.__promoter_id = promoter.uid
+            self.__promoter_address = promoter.wallet_hash
+            self.__promoter_key = promoter.wallet_private_key
 
-        self.__event_id = event_id
-        self.__price = price
-        self.__deploy_contract()
+        if customer is not None:
+            self.__customer_id = customer.uid
+            self.__customer_address = customer.wallet_hash
+            self.__customer_key = customer.wallet_private_key
 
     @staticmethod
     def __compile_source_file() -> dict:
@@ -44,7 +44,11 @@ class SmartTicketContract:
         with open(os.path.join(Path(__file__).resolve().parent, 'SmartContract.sol'), 'r') as f:
             source = f.read()
 
-        return compile_source(source, output_values=["abi", "bin"], )
+        return solcx.compile_source(
+            source,
+            output_values=["abi", "bin"],
+            base_path='smart_contract'
+        )
 
     def __get_transaction_hash(self, tx):
         """
@@ -68,21 +72,19 @@ class SmartTicketContract:
         """
         signed_tx = self.__w3.eth.account.sign_transaction(tx, private_key=user_key)
         tx_hash = self.__w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        _ = self.__w3.eth.wait_for_transaction_receipt(tx_hash)
-        return tx_hash
+        logs = self.__w3.eth.wait_for_transaction_receipt(tx_hash).logs
+        return tx_hash, logs
 
-    def __deploy_contract(self) -> None:
+    def deploy_new_contract(self):
         """
         Creates a new contract and deploys it to the network
         """
-        contract_id, contract_interface = self.__compile_source_file().popitem()
+        sources = self.__compile_source_file()
+        contract_id, contract_interface = next(iter(sources.items()))
+
         contract = self.__w3.eth.contract(abi=contract_interface['abi'], bytecode=contract_interface["bin"])
-        construct_tx = contract.constructor(
-            self.__w3.toWei(self.__price, 'ether'),
-            self.__promoter_id,
-            str(self.__event_id),
-            self.__customer_id
-        ).build_transaction({
+
+        construct_tx = contract.constructor().build_transaction({
             'nonce': self.__w3.eth.get_transaction_count(self.__promoter_address),
             'gas': SmartTicketContract.max_gas_price,
         })
@@ -90,19 +92,13 @@ class SmartTicketContract:
         tx_hash = self.__w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         tx_receipt = self.__w3.eth.wait_for_transaction_receipt(tx_hash)
 
-        self.__contract_address = tx_receipt['contractAddress']
+        return tx_receipt['contractAddress'], contract_interface['abi']
+
+    def set_contract(self, contract_address, contract_abi):
         self.__contract_instance = self.__w3.eth.contract(
-            address=self.__contract_address,
-            abi=contract_interface['abi']
+            address=contract_address,
+            abi=contract_abi
         )
-
-    def get_contract_address(self):
-        """
-        Gets the contract address
-
-        :return: Contract address
-        """
-        return self.__contract_address
 
     def confirm_purchase(self):
         """
@@ -113,28 +109,13 @@ class SmartTicketContract:
         :return: Transaction hash
         """
         price = self.__w3.toWei(self.__price, 'ether')
-        tx = self.__contract_instance.functions.confirmPurchase().buildTransaction({
+        tx = self.__contract_instance.functions.safeMint(self.__customer_address).buildTransaction({
             'nonce': self.__w3.eth.get_transaction_count(self.__customer_address),
             'gas': SmartTicketContract.max_gas_price,
             'value': price,
         })
-        tx_hash = self.__send_transaction(tx, self.__customer_key)
-        return self.__get_transaction_hash(tx_hash)
-
-    def confirm_received(self):
-        """
-        Confirms the user money is inside the contract and the money is ready to be sent to the promoter.
-        This function call the contract method through a new transaction.
-        The transaction is signed with the user key before sending it.
-
-        :return: Transaction hash
-        """
-        tx = self.__contract_instance.functions.confirmReceived().buildTransaction({
-            'nonce': self.__w3.eth.get_transaction_count(self.__customer_address),
-            'gas': SmartTicketContract.max_gas_price,
-        })
-        tx_hash = self.__send_transaction(tx, self.__customer_key)
-        return self.__get_transaction_hash(tx_hash)
+        tx_hash, logs = self.__send_transaction(tx, self.__customer_key)
+        return self.__get_transaction_hash(tx_hash), self.__w3.toInt(logs[0].topics[3])
 
     def refund_seller(self):
         """
@@ -144,9 +125,12 @@ class SmartTicketContract:
 
         :return: Transaction hash
         """
-        tx = self.__contract_instance.functions.refundSeller().buildTransaction({
+        tx = self.__contract_instance.functions.withdraw().buildTransaction({
             'nonce': self.__w3.eth.get_transaction_count(self.__promoter_address),
             'gas': SmartTicketContract.max_gas_price
         })
-        tx_hash = self.__send_transaction(tx, self.__promoter_key)
+        tx_hash, _ = self.__send_transaction(tx, self.__promoter_key)
         return self.__get_transaction_hash(tx_hash)
+
+    def get_owner_of(self, token):
+        return self.__contract_instance.functions.ownerOf(int(token)).call()
