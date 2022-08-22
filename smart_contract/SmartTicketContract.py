@@ -22,7 +22,7 @@ class SmartTicketContract:
         self.__api_key = __env('INFURA_API_KEY')
         self.__w3 = Web3(Web3.HTTPProvider(__env('INFURA_GURLI_ENDPOINT')))
 
-        self.__price = self.__w3.toWei(int(price), 'ether')
+        self.__price = self.__w3.toWei(price, 'ether')
         self.__contract_instance = None
 
         if promoter is not None:
@@ -84,7 +84,7 @@ class SmartTicketContract:
 
         contract = self.__w3.eth.contract(abi=contract_interface['abi'], bytecode=contract_interface["bin"])
 
-        construct_tx = contract.constructor().build_transaction({
+        construct_tx = contract.constructor(self.__price).build_transaction({
             'nonce': self.__w3.eth.get_transaction_count(self.__promoter_address),
             'gas': SmartTicketContract.max_gas_price,
         })
@@ -108,11 +108,10 @@ class SmartTicketContract:
 
         :return: Transaction hash
         """
-        price = self.__w3.toWei(self.__price, 'ether')
         tx = self.__contract_instance.functions.safeMint(self.__customer_address).buildTransaction({
             'nonce': self.__w3.eth.get_transaction_count(self.__customer_address),
             'gas': SmartTicketContract.max_gas_price,
-            'value': price,
+            'value': self.__price,
         })
         tx_hash, logs = self.__send_transaction(tx, self.__customer_key)
         return self.__get_transaction_hash(tx_hash), self.__w3.toInt(logs[0].topics[3])

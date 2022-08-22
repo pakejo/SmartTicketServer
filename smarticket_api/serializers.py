@@ -61,6 +61,8 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class SaleSerializer(serializers.ModelSerializer):
+    event = EventSerializer()
+
     class Meta:
         model = Sale
         fields = '__all__'

@@ -71,7 +71,6 @@ class SalesViewSets(viewsets.ModelViewSet):
             event=current_event,
             customerId=customer_id,
             date=datetime.now(),
-            price=price,
             purchaseHash=payment_hash,
             refundHash=refund_hash,
             token=token_id
