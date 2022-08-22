@@ -58,7 +58,7 @@ class Event(models.Model):
     name = models.CharField(max_length=20)
     description = models.TextField()
     promoter = models.ForeignKey(User, related_name='promoter', on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    price = models.DecimalField(max_digits=6, decimal_places=5)
     category = models.ForeignKey(Category, related_name='category', on_delete=models.CASCADE)
     status = models.CharField(max_length=20)
     date = models.DateTimeField()
