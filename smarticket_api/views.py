@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -57,6 +58,10 @@ class SalesViewSets(viewsets.ModelViewSet):
         event_id = request.data.get('event')
         price = float(request.data.get('price'))
 
+        logging.basicConfig(level=logging.INFO)
+
+        logging.info("Creating new sale: customerID: {0}, event: {1}".format(customer_id, event_id))
+
         current_event = Event.objects.get(pk=event_id)
         promoter = current_event.promoter
         customer = User.objects.get(pk=customer_id)
@@ -64,8 +69,13 @@ class SalesViewSets(viewsets.ModelViewSet):
 
         smart_contract = SmartTicketContract(promoter, customer, price)
         smart_contract.set_contract(contract.address, contract.abi)
+        logging.info("Smart contract for customerID: {0}, event: {1} created".format(customer_id, event_id))
+
         payment_hash, token_id = smart_contract.confirm_purchase()
+        logging.info("Payment for customerID: {0}, event: {1} done".format(customer_id, event_id))
+
         refund_hash = smart_contract.refund_seller()
+        logging.info("Refund for customerID: {0}, event: {1} done".format(customer_id, event_id))
 
         sale = Sale.objects.create(
             event=current_event,
@@ -76,6 +86,7 @@ class SalesViewSets(viewsets.ModelViewSet):
             token=token_id
         )
         sale.save()
+        logging.info("Sale for: {0}, event: {1} created".format(customer_id, event_id))
         serializer = SaleSerializer(sale)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
